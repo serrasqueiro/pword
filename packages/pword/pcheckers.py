@@ -9,7 +9,7 @@ Author: Henrique Moreira, h@serrasqueiro.com
 
 import sys
 import os
-import table.dictilar
+from pword import dictilar
 from pword.pcheckersconfig import PConfig
 import pword.fileaccess as fileaccess
 from pword.milot import MiLot, mprint
@@ -79,7 +79,7 @@ def process(out, err, args):
             return 2
         if opts["verbose"]:
             adict = pconf.config()
-            astr = table.dictilar.DictShown(adict)
+            astr = dictilar.DictShown(adict)
             print(f"--\n{astr}", end='')
         return 0
     apath = pconf.get_config_str("key_abs_path")	# key_abs_path=/.../...

@@ -239,12 +239,13 @@ class MiLot(MiAny):
         aprint('mil', debug, "check_triplets():", rank.get_rows())
         for tbl in (usrs, accs, pmap):
             items = tbl.get_key_list()
+            first = None
             for one in items:
                 val = tbl.keyval[0][one]
                 first = tbl.get_rows()[0][1:].strip().split(";")[0]
                 aprint('mil', debug, f"file={tbl.get_origin_file()}, {first} '{one}': {val}")
             if not items:
-                aprint('mil', debug, f"file={tbl.get_origin_file()}, {first}: <empty>")
+                aprint('mil', debug, f"file={tbl.get_origin_file()}, <empty>")
         for account in accs.get_key_list():
             spl = accs.keyval[0][account].split("=")
             assert len(spl) == 2, f"spl={spl}"

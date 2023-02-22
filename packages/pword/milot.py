@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
+#
+# (c)2020..2023  Henrique Moreira
 """ MiLot-like classes, for text files
 
 Author: Henrique Moreira, h@serrasqueiro.com
@@ -9,8 +11,7 @@ Author: Henrique Moreira, h@serrasqueiro.com
 # pylint: disable=consider-using-ternary, no-member
 
 import os.path
-import pword.fileaccess as fileaccess
-import table.stable as stable
+from pword import fileaccess, stable
 
 debug_areas = ["mil", "nav"]
 

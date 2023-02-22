@@ -7,7 +7,7 @@ Author: Henrique Moreira, h@serrasqueiro.com
 
 # pylint: disable=missing-function-docstring, unused-argument
 
-import pword.fileaccess as fileaccess
+from pword import fileaccess
 
 REL_PATH = fileaccess.path_join(".config", "pcheckers")
 CONFIG_NAME = "config"
@@ -43,10 +43,12 @@ class AnyConfig():
         """ Returns variable 'avar' value. """
         return self._my_vars.get(avar)
 
+    def messages(self):
+        return self._msgs
+
 
 class PConfig(AnyConfig):
     """ pcheckers configuration """
-    # pylint: disable=no-self-use
     _home, _path = "", ""
     _raw, _translated = None, None
 
@@ -59,7 +61,7 @@ class PConfig(AnyConfig):
         self._path = fileaccess.path_join(home, REL_PATH, CONFIG_NAME)
         conf = self._read_config(self._path)
         s_msg = conf.get("msg")
-        self._raw, self._translated = dict(), dict()
+        self._raw, self._translated = {}, {}
         if not s_msg:
             _, s_msg = self._set_config(conf)
         self._msgs = s_msg
@@ -93,10 +95,10 @@ class PConfig(AnyConfig):
 
     def _read_config(self, fname, optional=True) -> dict:
         """ Reads configuration from 'fname' """
-        is_ok, conf = True, dict()
-        data = list()
+        is_ok, conf = True, {}
+        data = []
         try:
-            data = [self.conf_data(elem) for elem in open(fname, "r").readlines()]
+            data = [self.conf_data(elem) for elem in self._readlines(fname)]
         except FileNotFoundError:
             is_ok = False
         if not is_ok:
@@ -133,7 +135,7 @@ class PConfig(AnyConfig):
         assert isinstance(conf, dict)
         is_ok, msg = True, ""
         self._raw = conf
-        confs = dict()
+        confs = {}
         for key in sorted(conf):
             if not is_ok:
                 break
@@ -154,6 +156,12 @@ class PConfig(AnyConfig):
         if is_ok:
             self._translated = confs
         return is_ok, msg
+
+    def _readlines(self, fname:str) -> list:
+        with open(fname, "r", encoding="ascii") as fdin:
+            res = fdin.readlines()
+        assert isinstance(res, list), fname
+        return res
 
 
 if __name__ == "__main__":

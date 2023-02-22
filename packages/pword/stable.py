@@ -44,8 +44,6 @@ class STable():
 
 class STableText(STable):
     """ Text Table """
-    # pylint: disable=no-self-use
-
     _remaining_fields = 0
     _key_fields, _all_fields = tuple(), tuple()
     _default_splitter = ";"
@@ -139,7 +137,7 @@ class STableKey(STableText):
         if ordered is None:
             is_ok = self.hash_key()
             if not is_ok:
-                return list()
+                return []
             _, _, ordered = self.keyval
         assert ordered is not None
         assert isinstance(ordered, list)
@@ -149,7 +147,7 @@ class STableKey(STableText):
         """ Reloads data from file. """
         prev_header = self.get_header()
         self.keyval = (None, None, None)
-        self._rows = list()
+        self._rows = []
         is_ok = self._add_from_file(self._origin)
         if not is_ok:
             return False
@@ -173,7 +171,7 @@ class STableKey(STableText):
         # pylint: disable=invalid-name
         inv_chars = self._get_basic_invalid(invalid_chrs)
         spl_chr = self._splitter
-        key_to, from_name = dict(), dict()
+        key_to, from_name = {}, {}
         head = self._rows[0]
         rows = self._rows[1:]
         assert head.startswith("#")

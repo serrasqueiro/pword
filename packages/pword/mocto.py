@@ -5,14 +5,15 @@
 Author: Henrique Moreira, h@serrasqueiro.com
 """
 
-# pylint: disable=missing-function-docstring, no-self-use
+# pylint: disable=missing-function-docstring
 
 
 _MATRIX_SQUARE = 8
 _MATRIX_LINES = "ABCDEFGH"
 _XY_MAX_STR_8CARD = "H8.3"
-_BASIC_CARD = {"by-letter": dict(),
-               }
+_BASIC_CARD = {
+    "by-letter": {},
+}
 
 
 class MatrixAny():
@@ -53,7 +54,7 @@ class MatrixOcto(MatrixAny):
             assert not fname
             code = self._read_from_data(data)
         else:
-            code = self._read_from_data(open(fname, "r").read())
+            code = self._read_from_data(open(fname, "r", encoding="ascii").read())
         self._error = code
         self.rows = _BASIC_CARD
 

@@ -4,7 +4,7 @@
 Author: Henrique Moreira, h@serrasqueiro.com, (c) 2021  Henrique Moreira
 """
 
-# pylint: disable=missing-function-docstring, unused-argument
+# pylint: disable=missing-function-docstring, unused-argument, consider-using-f-string
 
 import os
 import stat

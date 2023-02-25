@@ -11,7 +11,7 @@ import sys
 import os
 from pword import dictilar
 from pword.pcheckersconfig import PConfig
-import pword.fileaccess as fileaccess
+from pword import fileaccess
 from pword.milot import MiLot, mprint
 
 

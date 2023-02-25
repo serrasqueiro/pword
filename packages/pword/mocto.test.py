@@ -43,7 +43,8 @@ def run_cat(out, path, param) -> int:
     """ shows card """
     assert out
     code = 0
-    data = open(path, "r").read()
+    with open(path, "r", encoding="ascii") as fdin:
+        data = fdin.read()
     octo = MatrixOcto(data)
     if octo.is_ok():
         code = show_par(octo, param)

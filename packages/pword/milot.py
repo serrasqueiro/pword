@@ -7,7 +7,7 @@ Author: Henrique Moreira, h@serrasqueiro.com
 """
 
 # pylint: disable=missing-function-docstring
-# pylint: disable=consider-using-ternary, no-member
+# pylint: disable=consider-using-ternary, too-many-locals
 
 import os.path
 from pword import fileaccess, stable
@@ -46,6 +46,7 @@ TBL_ALLOWED_VALUE_GEN = (
 class MiAny():
     """ Generic class for text files
     """
+    # pylint: disable=no-member
     DEF_MI_NAME = "my"
 
     def __init__(self, name):

@@ -69,7 +69,7 @@ class MatrixOcto(MatrixAny):
             return self.rows["by-letter"][letter]
         if isinstance(letter, (tuple, list)):
             return [self.rows["by-letter"][alpha] for alpha in letter]
-        return list()
+        return []
 
     def builder(self, debug=0) -> bool:
         """ Builds useful data-structure, and returns True if all is ok. """

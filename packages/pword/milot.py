@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
 # (c)2020..2023  Henrique Moreira
@@ -47,11 +46,15 @@ TBL_ALLOWED_VALUE_GEN = (
 class MiAny():
     """ Generic class for text files
     """
-    _db_order, _db_alt = tuple(), tuple()
-    _ignore_case = True
-    _map_mi_to_kind = None
-    _invalid_chrs_in_value = ":"
+    DEF_MI_NAME = "my"
 
+    def __init__(self, name):
+        assert name, "name empty"
+        self.name = name
+        self._db_order, self._db_alt = tuple(), tuple()
+        self._ignore_case = True
+        self._map_mi_to_kind = None
+        self._invalid_chrs_in_value = ":"
 
     def __str__(self):
         return self.get_str()
@@ -66,7 +69,8 @@ class MiLot(MiAny):
     # _map_names = {}
     dbm = None
 
-    def __init__(self, map_names=None, alt_tables=False):
+    def __init__(self, map_names=None, alt_tables=False, name=None):
+        super().__init__(MiAny.DEF_MI_NAME if name is None else name)
         self._map_names = _MAP_NAMES if map_names is None else map_names
         assert isinstance(self._map_names, dict)
         self._process_alt = alt_tables
@@ -157,13 +161,15 @@ class MiLot(MiAny):
         return res
 
     def dump_db(self, show_pass=False, debug=0):
-        assert self.dbm
-        aprint('mil', debug, self.dbm)
+        assert self.dbm, self.name
+        aprint('mil', debug, f"dump_db(show_pass={show_pass}): {self.name}")
         for tbl_name in self._db_order:
             tbl = self.dbm[tbl_name]
-            aprint('mil', debug,
-                   f"{tbl.get_origin_file()}: #{len(tbl.get_rows())},"
-                   f" {tbl.get_header()}")
+            aprint(
+                'mil', debug,
+                f"{tbl.get_origin_file()}: #{len(tbl.get_rows())},"
+                f" {tbl.get_header()}"
+            )
         for tbl_name in self._db_order:
             show = (tbl_name == "pmap" and show_pass) or tbl_name != "pmap"
             if show:
@@ -261,7 +267,7 @@ class MiLot(MiAny):
         # All account titles listed at rank should be at accs
         lookup = accs.key_dict()
         for key in rank.get_key_list():
-            assert key in lookup, key
+            assert key in lookup, f"rank: '{key}' not at accs"
             assert key in accs.get_key_list(), key	# Redundant!
             val = rank.key_dict()[key]
             assert 0 <= int(val[0]) <= 9, val

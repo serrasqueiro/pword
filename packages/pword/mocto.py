@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 """ mocto -- Matrix with 8x8 (octogonal)
 

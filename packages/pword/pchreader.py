@@ -33,6 +33,11 @@ python {__file__} [options] path
 
 Options are:
   -v                Verbose (twice: -v -v, more verbose)
+
+Verbose:
+	0	Only dump account pass
+	1	Dump basic information (not passes)
+	2	Dump complete pass
 """)
     sys.exit(code if code else 0)
 
@@ -43,8 +48,10 @@ def process(out, err, args):
     }
     param = args
     while param and param[0].startswith("-"):
-        if param[0].startswith("-v"):
-            opts["verbose"] += param[0].count("v")
+        this = param[0]
+        if this.startswith("-v"):
+            assert len(this) == this.count("v") + 1, this
+            opts["verbose"] += this.count("v")
             del param[0]
             continue
         return None
@@ -54,16 +61,15 @@ def process(out, err, args):
     del param[0]
     if param:
         return None
+    if opts["verbose"] > 3:
+        print("Too much verbose!", end="\n\n")
+        return None
     code = do_it(out, err, apath, opts)
     return code
 
 
 def do_it(out, err, path, opts) -> int:
-    """
-    Verbose:
-	0	Only dump account pass
-	1	Only dump account pass
-	2	Dump complete pass
+    """ Main script
     """
     assert path
     verbose = opts["verbose"]
@@ -77,6 +83,7 @@ def do_it(out, err, path, opts) -> int:
         return code
     if verbose <= 0:
         simple_dump(out, accs, mis)
+        #print("### simple_dump() end:", len(accs), "; last:", accs[-1])
     return 0
 
 def process_milot(err, path, verbose, debug=0) -> tuple:
@@ -93,7 +100,7 @@ def process_milot(err, path, verbose, debug=0) -> tuple:
     shown = mis.dbm["rank"].key_dict()
     if verbose > 0:
         if mis.dbm:
-            print("# Dumping dbm")
+            print(f"# Dumping dbm (debug={debug})")
             mis.dump_db(dump_pass, debug=debug)
     if verbose >= 2:
         for item in sorted(shown):
@@ -102,7 +109,12 @@ def process_milot(err, path, verbose, debug=0) -> tuple:
 
 def acc_reader(acc_file, path="") -> list:
     """ Reads textual account file """
-    accs = [line.strip().split(";") for line in open(acc_file, "r").readlines()]
+    def read_acc(fname):
+        with open(fname, "r", encoding="ascii") as fdin:
+            res = fdin.readlines()
+        return res
+
+    accs = [line.strip().split(";") for line in read_acc(acc_file)]
     accs = sorted(accs, key=lambda x: (x[0].casefold(), x[0]))
     if not path:
         return accs

@@ -1,0 +1,20 @@
+# Hint files;
+/todo.txt
+
+# Python cache
+__pycache__
+*.pyc
+
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.so
+*.lo
+*.o
+*.obj
+# and backup files:
+*.*~
+
+# PyCharm artifacts
+venv/

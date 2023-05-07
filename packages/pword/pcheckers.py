@@ -68,6 +68,14 @@ def process(out, err, args):
     if opts["cred"] and opts["replica"]:
         return None	# one option, or the other, not both!
 
+    other_opts = (
+        key_local_path,
+    )
+    code = process_user_ask(out, err, param, other_opts, opts)
+    return code
+
+def process_user_ask(out, err, param, other_opts, opts):
+    key_local_path = other_opts[0]
     pconf = PConfig()
     if opts["config"] == "show-path":
         if param[1:]:
@@ -111,7 +119,9 @@ def process(out, err, args):
 
 
 def do_it(out, err, param, opts) -> int:
+    """ Do it! """
     assert param
+    code = 0
     verbose = opts["verbose"]
     debug = int(verbose >= 3)
     dump_pass = 1 if verbose else 0

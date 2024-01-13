@@ -11,7 +11,7 @@ Author: Henrique Moreira, h@serrasqueiro.com
 # pylint: disable=missing-function-docstring
 
 
-import pword.ZipFile
+from pword.ZipFile import ZipFile
 
 _MATRIX_SQUARE = 8
 _MATRIX_LINES = "ABCDEFGH"
@@ -22,7 +22,9 @@ _BASIC_CARD = {
 
 
 def test_main():
-    moct = MatrixOcto8(fname="key.zip", name="myOcto")
+    MYPASSWORD = ""
+    #MYPASSWORD = "myPas$word2!"	# Enter your password here if necessary
+    moct = MatrixOcto8(fname="key.zip", name="myOcto", pwd=MYPASSWORD)
     #print("get_str():", moct.get_str())
     moct.builder()
     assert moct.rows["by-letter"], moct.name
@@ -63,10 +65,11 @@ class MatrixOcto8(TextMatrix):
     """
     rows = None
 
-    def __init__(self, data="", fname=None, name="octo"):
+    def __init__(self, data="", fname=None, pwd="", name="octo"):
         super().__init__(name)
         code = -1
         self._dim = _MATRIX_SQUARE
+        self._mypass = bytes(pwd, "ascii") if pwd else None
         if data:
             assert not fname, name
             code = self._read_from_data(data)
@@ -119,8 +122,9 @@ class MatrixOcto8(TextMatrix):
     def _card_reader(self, fname, is_zip:bool) -> int:
         """ Reads either a text file or a zip-file """
         there = []
+        mypass = self._mypass
         if is_zip:
-            myzip = ZipFile.ZipFile(fname)
+            myzip = ZipFile(fname)
             there = [
                 {
                     "obj": ala,
@@ -130,7 +134,7 @@ class MatrixOcto8(TextMatrix):
         if there:
             assert len(there) == 1, "zip not with single file"
             dname = there[0]["path"]
-            with myzip.open(dname) as fdin:
+            with myzip.open(dname, pwd=mypass) as fdin:
                 data = fdin.read()
             text = data.decode("ascii")
         else:

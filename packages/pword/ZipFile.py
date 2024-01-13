@@ -1,7 +1,3 @@
-# Copied from https://github.com/python/cpython/tree/main/Lib/zipfile
-#
-# commit: b44b9d99004f096619c962a8b42a19322f6a441b
-
 """
 Read and write ZIP files.
 

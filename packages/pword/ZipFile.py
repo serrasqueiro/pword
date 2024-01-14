@@ -1,3 +1,7 @@
+# copied from https://raw.githubusercontent.com/python/cpython/main/Lib/zipfile/__init__.py at https://github.com/python/cpython/
+#
+# commit reference: b44b9d99004f096619c962a8b42a19322f6a441b
+
 """
 Read and write ZIP files.
 

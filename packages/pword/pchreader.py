@@ -22,9 +22,12 @@ PASS_EXPOSE_TUPS = (
     "gm-",
 )
 
+HIGHEST_RANK_SHOWN = 5	# Highest rank to be shown (very high rank means irrelevant!)
+
 
 def main():
     """ Main (non-interactive) script """
+    higher_rank = HIGHEST_RANK_SHOWN
     code = process(sys.stdout, sys.stderr, sys.argv[1:])
     if code is None:
         print(f"""Usage:
@@ -35,7 +38,7 @@ Options are:
   -v                Verbose (twice: -v -v, more verbose)
 
 Verbose:
-	0	Only dump account pass
+	0	Dump account pass for rank <= {higher_rank}
 	1	Dump basic information (not passes)
 	2	Dump complete pass
 """)
@@ -158,29 +161,41 @@ def dict_from_triplets(triplets) -> dict:
     return adict
 
 def simple_dump(out, accs:list, mis):
-    tolerance = 1
+    tolerance = 10
     max_width = 24 + 12 + 2 + 11 + tolerance
     lines = []
     rankdict = mis.dbm["rank"].key_dict()
+    after = {}
     for trip in accs:
         what, user, kpass = trip
-        if what not in rankdict:
-            continue
-        if rankdict[what].startswith("0"):	# e.g. 'title;0;unused'
+        r_dict = rankdict.get(what)
+        s_pair = ["99", what] if r_dict is None else r_dict.split("=", maxsplit=1)
+        s_rank, hint = s_pair
+        rank = int(s_rank)
+        assert rank >= 0, f"Rank too low (rank={rank}): {what}"
+        assert "~" not in what, what
+        if not rank:
             continue
         assert not what.startswith(TUP_EXCLUDE), what
-        hint = rankdict[what].split("=", maxsplit=1)[-1]
+        s_symb = "*" if rank > 9 else " "
         hint = hint.replace(" ", "~")
-        shown = f"{hint:_<24} {user:<12} {kpass:.<11}"
+        shown = f"{hint:_<24}{s_symb} {user:<12} {kpass:.<11}"
         alen = len(shown)
+        #print(f"### THIS (alen={alen}), rank={rank}: {shown}")
         msg = f"Too wide ({alen} vs {max_width}, kpass len={len(kpass)}): {shown}"
         assert 0 < alen <= max_width, msg
         shown = shown.replace(" " * 4, " .. ")
         lines.append(shown)
-    for line in sorted(lines, key=str.casefold):
-        shown = line.replace("~", " ")
-        out.write(f"{shown}\n")
+        after[shown] = rank if rank <= 9 else 1	# Assume missing rank is 1 (highest)
+    print_out(out, lines, after)
+    return lines
 
+def print_out(out, lines, after):
+    for line in sorted(lines, key=str.casefold):
+        shown = line.replace("~", " ")	# little trick to let blank be considered last!
+        rank = after[line]
+        if rank <= HIGHEST_RANK_SHOWN:
+            out.write(f"{rank}. {shown}\n")
 
 if __name__ == "__main__":
     main()

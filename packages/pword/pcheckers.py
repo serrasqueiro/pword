@@ -37,6 +37,7 @@ def process(out, err, args):
         "verbose": 0,
         "cred": None,
         "replica": None,
+        "similar": True,
         "config": "",
     }
     key_local_path = False
@@ -95,7 +96,7 @@ def process(out, err, args):
         mis, creds = show_credentials(param, opts)
         code = 0 if mis else 4
         if code:
-            assert creds
+            assert creds, "Expected that no creds were found!"
             err.write(f"Bogus (error-code {code}), msg: {creds[0]}\n")
         else:
             if not creds:
@@ -154,7 +155,7 @@ def do_replica(out, err, dest, param) -> int:
         if not is_ok:
             err.write(f"Could not find destination: {dpath}\n")
             return 4
-    datas, destdir = dict(), ""
+    datas, destdir = {}, ""
     for source, dpath in pairs:
         data = open(source, "r", encoding="ascii").read()
         datas[source] = (data, fileaccess.get_file_time(source)[:2])
@@ -181,7 +182,7 @@ def show_credentials(param, opts, out=True):
     verbose = opts["verbose"]
     debug = int(verbose >= 3)
     mprint(debug, f"show_credentials(): opts={opts}, debug={debug}")
-    a_filter = opts["cred"]
+    a_filter, similar = opts["cred"], opts["similar"]
     mis = new_milot()
     if verbose > 0:
         print("Show credentials, filter:", a_filter if a_filter else "ALL")
@@ -189,7 +190,7 @@ def show_credentials(param, opts, out=True):
         code = mis.process_path(path, debug=debug)
         if code:
             return None, [f"Bogus path: '{path}'"]
-    creds = mis.credentials(a_filter)
+    creds, tries = best_matches(mis, a_filter, similar, debug)
     if not out:
         return mis, creds
     info = mis.dbm["info"]
@@ -202,8 +203,37 @@ def show_credentials(param, opts, out=True):
             print("--")
         else:
             print(f"{title:_<20.19} {cred[0]} {cred[1]}")
+    if not creds:
+        if verbose:
+            print("Tried:", sorted(tries))
     return mis, creds
 
+def best_matches(mis, a_filter, similar, debug=0) -> tuple:
+    """ If similar is 'True', it returns all gathered data. """
+    creds = []
+    tries = {}
+    for idx, sbst in enumerate(
+        (None, ".", " ", "-", "_"),
+        1
+    ):
+        if sbst is None:
+            flt = a_filter
+        else:
+            flt = a_filter.replace(sbst, " ")
+        creds = mis.credentials(flt)
+        if not flt:
+            return creds, tries
+        shown = creds if len(creds) < 3 else (creds[:2] + ["..."])
+        if debug > 0:
+            print(f"\n# best_matches(idx={idx}): credentials({repr(flt)}): {shown}")
+        if not creds and not similar:
+            break
+        if flt in tries:
+            continue
+        tries[flt] = idx	# Indicate the index of replacement (only the first matching)
+        if creds:
+            return creds, tries
+    return creds, tries
 
 def new_milot():
     """ Returns new instance of table dbm.

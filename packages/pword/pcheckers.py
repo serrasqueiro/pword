@@ -214,7 +214,6 @@ def best_matches(mis, a_filter, similar, debug=0) -> tuple:
     tries = {}
     for idx, sbst in enumerate(
         (None, ".", " ", "-", "_"),
-        1
     ):
         if sbst is None:
             flt = a_filter
@@ -224,9 +223,14 @@ def best_matches(mis, a_filter, similar, debug=0) -> tuple:
         if not flt:
             return creds, tries
         shown = creds if len(creds) < 3 else (creds[:2] + ["..."])
+        recheck = not creds and not similar
         if debug > 0:
-            print(f"\n# best_matches(idx={idx}): credentials({repr(flt)}): {shown}")
-        if not creds and not similar:
+            print(
+              f"""
+# best_matches(idx={idx}, {repr(sbst)}): credentials({repr(flt)}): {shown}
+"""
+            )
+        if recheck:
             break
         if flt in tries:
             continue

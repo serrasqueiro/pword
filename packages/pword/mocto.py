@@ -66,7 +66,7 @@ class MatrixOcto(MatrixAny):
 
     def get_by_letter(self, letter) -> list:
         if isinstance(letter, str):
-            return self.rows["by-letter"][letter]
+            return self.rows["by-letter"][letter.upper()]
         if isinstance(letter, (tuple, list)):
             return [self.rows["by-letter"][alpha] for alpha in letter]
         return []

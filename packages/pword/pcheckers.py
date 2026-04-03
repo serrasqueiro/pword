@@ -190,10 +190,11 @@ def show_credentials(param, opts, out=True):
         code = mis.process_path(path, debug=debug)
         if code:
             return None, [f"Bogus path: '{path}'"]
-    creds, tries = best_matches(mis, a_filter, similar, debug)
+    info = mis.dbm["info"]
+    #creds, tries = best_matches(mis, a_filter, similar, debug)
+    creds, tries = best_rank_match(mis, a_filter, debug=1)
     if not out:
         return mis, creds
-    info = mis.dbm["info"]
     for title, cred in creds:
         if verbose > 0:
             print(f"{title}: {cred[0]} {cred[1]}")
@@ -208,8 +209,11 @@ def show_credentials(param, opts, out=True):
             print("Tried:", sorted(tries))
     return mis, creds
 
+
 def best_matches(mis, a_filter, similar, debug=0) -> tuple:
     """ If similar is 'True', it returns all gathered data. """
+    assert isinstance(similar, bool), "similar"
+    assert debug >= 0, "Debug!"
     creds = []
     tries = {}
     for idx, sbst in enumerate(
@@ -234,10 +238,40 @@ def best_matches(mis, a_filter, similar, debug=0) -> tuple:
             break
         if flt in tries:
             continue
-        tries[flt] = idx	# Indicate the index of replacement (only the first matching)
+        tries[flt] = idx        # Indicate the index of replacement (only the first matching)
         if creds:
             return creds, tries
     return creds, tries
+
+
+def best_rank_match(mis, a_filter=None, show_pass="plain", debug=0):
+    """ Returns credentials sorted by rank (1..9). 0 means ignored.
+    Lower rank number = higher priority.
+    """
+    assert show_pass in ("plain", "ref"), show_pass
+    # Get normal credential list
+    creds = mis.credentials(
+        a_filter=a_filter,
+        if_single=False,
+    )
+    rank_tbl = mis.dbm["rank"]
+    ranks = rank_tbl.keyval[0]   # dict: title -> rank_string
+    # Attach rank to each credential
+    ranked = []
+    for title, pair in creds:
+        a_rank = ranks.get(title, "9")
+        rnum = int(a_rank.split("=", maxsplit=1)[0])
+        if rnum <= 0:
+            continue
+        ranked.append((rnum, title, pair))
+    # Sort by rank number, then title
+    ranked.sort(key=lambda x: (x[0], x[1]))
+    # Strip rank from output
+    tries = [
+        (title, pair) for (rnum, title, pair) in ranked
+    ]
+    return tries, creds
+
 
 def new_milot():
     """ Returns new instance of table dbm.

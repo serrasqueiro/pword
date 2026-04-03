@@ -224,12 +224,12 @@ def best_matches(mis, a_filter, similar, debug=0) -> tuple:
             return creds, tries
         shown = creds if len(creds) < 3 else (creds[:2] + ["..."])
         recheck = not creds and not similar
-        if debug > 0:
-            print(
-              f"""
+        mprint(
+            debug,
+            f"""
 # best_matches(idx={idx}, {repr(sbst)}): credentials({repr(flt)}): {shown}
-"""
-            )
+""",
+        )
         if recheck:
             break
         if flt in tries:

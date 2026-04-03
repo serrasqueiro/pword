@@ -1,4 +1,4 @@
-# stable.py  (c)2020, 2021  Henrique Moreira
+# stable.py  (c)2020, 2026  Henrique Moreira
 
 """
 Easy simple text tables

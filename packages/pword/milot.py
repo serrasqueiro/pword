@@ -73,7 +73,7 @@ class MiLot(MiAny):
     def __init__(self, map_names=None, alt_tables=False, name=None):
         super().__init__(MiAny.DEF_MI_NAME if name is None else name)
         self._map_names = _MAP_NAMES if map_names is None else map_names
-        assert isinstance(self._map_names, dict)
+        assert isinstance(self._map_names, dict), self.name
         self._process_alt = alt_tables
         self._db_order = (
             "accs", "users", "pmap",
@@ -100,9 +100,9 @@ class MiLot(MiAny):
     def process_path(self, path, dump_level=0, debug=0) -> int:
         """ Main path processor!
         """
-        assert isinstance(path, str)
-        assert int(dump_level) >= 0
-        assert int(debug) >= 0
+        assert isinstance(path, str), self.name
+        assert int(dump_level) >= 0, "dump_level!"
+        assert int(debug) >= 0, "debug level!"
         _invalid_chrs = " :!?$*()="
         those = sorted(self._map_names)
         self._build_kinds()
@@ -200,7 +200,6 @@ class MiLot(MiAny):
                 print(f"Key ({what}) {k}: {val}")
         return True
 
-
     def check_consistency(self, debug=0) -> bool:
         """ Checks consistency of database
         """
@@ -222,21 +221,28 @@ class MiLot(MiAny):
             (rank,),
             debug
         )
-        assert is_ok
-        if info:
-            # Check 'info' table consistency: key (first column) must be at 'accs'
-            for one in info.get_key_list():
-                is_ok = one in accs.keyval[0]
-                aval = info.keyval[0][one]
-                if aval.startswith("F"):	# No check on 'accs'
-                    continue
-                # Check any upper-case match
-                ups, xtra = [elem.upper() for elem in accs.keyval[0]], ""
-                if one.upper() in ups:
-                    xtra = " (try fix-case)"
-                if not is_ok:
-                    info.report_error(f"Field key '{one}' not in 'accs'{xtra}")
-                    return False
+        assert is_ok, "check_triplets()"
+        self._check_info(info, accs, debug=debug)
+        return True
+
+    def _check_info(self, info, accs, debug=0):
+        """ Check 'info' table consistency. """
+        if not info:
+            return True
+        # Check 'info' table consistency: key (first column) must be at 'accs'
+        for one in info.get_key_list():
+            is_ok = one in accs.keyval[0]
+            aval = info.keyval[0][one]
+            mprint(debug, f"one={one}, aval={aval}")
+            if aval.startswith("F"):	# No check on 'accs'
+                continue
+            # Check any upper-case match
+            ups, xtra = [elem.upper() for elem in accs.keyval[0]], ""
+            if one.upper() in ups:
+                xtra = " (try fix-case)"
+            if not is_ok:
+                info.report_error(f"Field key '{one}' not in 'accs'{xtra}")
+                return False
         return True
 
     def _check_triplets(self, trip, other, debug) -> bool:
@@ -276,11 +282,12 @@ class MiLot(MiAny):
                 rank.key_dict()[key] = val + key
         return True
 
-    def credentials(self, a_filter=None, show_pass="plain", if_single=True) -> list:
+    def credentials(self, a_filter=None, pass_text="plain", if_single=True) -> list:
         """ Returns the complete list of credentials (title, (username, password))
         It yields a single result if if_single=True and a_filter matches (exactly) a single title.
         """
-        assert isinstance(if_single, bool)
+        assert isinstance(if_single, bool), self.name
+        assert isinstance(pass_text, str), "Not pass_text=plain?"
         alist, refs = [], []
         match = (None, None)
         #key_to, from_name, accounts = self.dbm["accs"].keyval
@@ -296,7 +303,7 @@ class MiLot(MiAny):
             username = usrs[0][trip[1][0]]
             pass_ref = trip[1][1]
             try:
-                passwd = pmap[0][pass_ref] if show_pass == "plain" else pass_ref
+                passwd = pmap[0][pass_ref] if pass_text == "plain" else pass_ref
             except KeyError:
                 passwd = "*" + pass_ref
             pair = (username, passwd)

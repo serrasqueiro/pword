@@ -3,7 +3,7 @@
 # (c)2020..2023  Henrique Moreira
 """ MiLot-like classes, for text files
 
-Author: Henrique Moreira, h@serrasqueiro.com
+Author: Henrique Moreira, henrique@declaratived.com
 """
 
 # pylint: disable=missing-function-docstring

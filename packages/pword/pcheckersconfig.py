@@ -2,11 +2,12 @@
 # -*- coding: utf-8 -*-
 """ pcheckers configuration
 
-Author: Henrique Moreira, h@serrasqueiro.com
+Author: Henrique Moreira, henrique@declaratived.com
 """
 
 # pylint: disable=missing-function-docstring, unused-argument
 
+import os.path
 from pword import fileaccess
 
 REL_PATH = fileaccess.path_join(".config", "pcheckers")
@@ -77,6 +78,10 @@ class PConfig(AnyConfig):
     def config(self) -> dict:
         """ Returns the configuration. """
         return self._translated
+
+    def main_path(self):
+        astr = self.get_config_str("key_abs_path")
+        return os.path.realpath(astr)
 
     def get_config_str(self, avar, def_val="") -> str:
         """ Returns configuration of 'avar'. """

@@ -5,7 +5,7 @@
 
 (c)2024  Henrique Moreira
 
-Author: Henrique Moreira, h@serrasqueiro.com
+Author: Henrique Moreira, henrique@declaratived.com
 """
 
 # pylint: disable=missing-function-docstring

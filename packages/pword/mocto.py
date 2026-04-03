@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """ mocto -- Matrix with 8x8 (octogonal)
 
-Author: Henrique Moreira, h@serrasqueiro.com
+Author: Henrique Moreira, henrique@declaratived.com
 """
 
 # pylint: disable=missing-function-docstring

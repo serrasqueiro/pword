@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """ fileaccess -- OS-independent primitives
 
-Author: Henrique Moreira, h@serrasqueiro.com, (c) 2021  Henrique Moreira
+Author: Henrique Moreira <henrique@declaratived.com> (c) 2021, 2026  Henrique Moreira
 """
 
-# pylint: disable=missing-function-docstring, unused-argument, consider-using-f-string
+# pylint: disable=missing-function-docstring, unused-argument
 
 import os
 import stat

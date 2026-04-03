@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """ Matrix 8x8 (octogonal) reader; lib: mocto.py
 
-Author: Henrique Moreira, h@serrasqueiro.com
+Author: Henrique Moreira, henrique@declaratived.com
 """
 
 import sys

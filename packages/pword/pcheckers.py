@@ -14,6 +14,8 @@ from pword.pcheckersconfig import PConfig
 from pword import fileaccess
 from pword.milot import MiLot, mprint
 
+DEF_RANK_WHEN_MISSING = 4
+
 
 def main():
     """ Main (non-interactive) script """
@@ -247,6 +249,7 @@ def best_matches(mis, a_filter, similar, debug=0) -> tuple:
 def best_rank_match(mis, a_filter=None, show_pass="plain", debug=0):
     """ Returns credentials sorted by rank (1..9). 0 means ignored.
     Lower rank number = higher priority.
+    When rank.mi has no score for an account, consider 4 (DEF_RANK_WHEN_MISSING)
     """
     assert show_pass in ("plain", "ref"), show_pass
     # Get normal credential list
@@ -259,11 +262,12 @@ def best_rank_match(mis, a_filter=None, show_pass="plain", debug=0):
     # Attach rank to each credential
     ranked = []
     for title, pair in creds:
-        a_rank = ranks.get(title, "9")
+        a_rank = ranks.get(title, str(DEF_RANK_WHEN_MISSING))
         rnum = int(a_rank.split("=", maxsplit=1)[0])
         if rnum <= 0:
             continue
         ranked.append((rnum, title, pair))
+        mprint(debug, "best_rank_match():", ranked[-1])
     # Sort by rank number, then title
     ranked.sort(key=lambda x: (x[0], x[1]))
     # Strip rank from output

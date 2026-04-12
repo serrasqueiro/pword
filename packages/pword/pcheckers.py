@@ -6,6 +6,7 @@ Author: Henrique Moreira, henrique@declaratived.com
 """
 
 # pylint: disable=missing-function-docstring, unused-argument
+# pylint: disable=too-many-statements
 
 import sys
 import os
@@ -30,6 +31,8 @@ Options are:
   -c ALL|string     Show all credentials, or names starting with 'string'.
 
   -p (or --show-path) shows current configuration path (and optionally config).
+
+  -r (or --replica) Replicate database to Linux 'r-x' path (dir).
 """)
     sys.exit(code if code else 0)
 
@@ -159,7 +162,8 @@ def do_replica(out, err, dest, param) -> int:
             return 4
     datas, destdir = {}, ""
     for source, dpath in pairs:
-        data = open(source, "r", encoding="ascii").read()
+        with open(source, "r", encoding="ascii") as fdin:
+            data = fdin.read()
         datas[source] = (data, fileaccess.get_file_time(source)[:2])
         destdir = fileaccess.dirname(dpath)
     for source, dpath in pairs:
@@ -194,7 +198,7 @@ def show_credentials(param, opts, out=True):
             return None, [f"Bogus path: '{path}'"]
     info = mis.dbm["info"]
     #creds, tries = best_matches(mis, a_filter, similar, debug)
-    creds, tries = best_rank_match(mis, a_filter, debug=1)
+    creds, tries = best_rank_match(mis, a_filter, debug=debug)
     if not out:
         return mis, creds
     for title, cred in creds:
@@ -251,7 +255,7 @@ def best_rank_match(mis, a_filter=None, show_pass="plain", debug=0):
     Lower rank number = higher priority.
     When rank.mi has no score for an account, consider 4 (DEF_RANK_WHEN_MISSING)
     """
-    assert show_pass in ("plain", "ref"), show_pass
+    assert show_pass in ("plain", "ref"), f"show_pass={repr(show_pass)}"
     # Get normal credential list
     creds = mis.credentials(
         a_filter=a_filter,
@@ -264,10 +268,11 @@ def best_rank_match(mis, a_filter=None, show_pass="plain", debug=0):
     for title, pair in creds:
         a_rank = ranks.get(title, str(DEF_RANK_WHEN_MISSING))
         rnum = int(a_rank.split("=", maxsplit=1)[0])
+        mprint(debug, f"best_rank_match(), rank={rnum}: title, pair={[title, pair]}")
         if rnum <= 0:
             continue
         ranked.append((rnum, title, pair))
-        mprint(debug, "best_rank_match():", ranked[-1])
+        mprint(debug, "best_rank_match(), added:", ranked[-1])
     # Sort by rank number, then title
     ranked.sort(key=lambda x: (x[0], x[1]))
     # Strip rank from output

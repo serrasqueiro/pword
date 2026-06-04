@@ -6,14 +6,13 @@ Author: Henrique Moreira, henrique@declaratived.com
 """
 
 # pylint: disable=missing-function-docstring, unused-argument
-# pylint: disable=too-many-statements
+# pylint: disable=too-many-statements,too-many-return-statements
 
 import sys
 import os
-from pword import dictilar
-from pword.pcheckersconfig import PConfig
+import pword
+from pword import PConfig, MiLot, mprint
 from pword import fileaccess
-from pword.milot import MiLot, mprint
 
 DEF_RANK_WHEN_MISSING = 4
 
@@ -28,6 +27,9 @@ python pcheckers.py [options] [path] [path...]
 
 Options are:
   -v                Verbose (twice: -v -v, shows information too)
+			Three: more verbose info;
+			Four: Debug, and shows path!
+
   -c ALL|string     Show all credentials, or names starting with 'string'.
 
   -p (or --show-path) shows current configuration path (and optionally config).
@@ -84,16 +86,17 @@ def process(out, err, args):
             err.write(f"File not found: {pconf.get_path()}\n")
             return 2
         if opts["verbose"]:
-            adict = pconf.config()
-            astr = dictilar.DictShown(adict)
-            print(f"--\n{astr}", end='')
+            adict = pword.DictShown(pconf.config())
+            print("--\n", adict, sep="")
+            if opts["verbose"] >= 4:
+                print("Debug:", adict.obj)
         return 0
     apath = pconf.get_config_str("key_abs_path")	# key_abs_path=/.../...
     if key_local_path:
         apath = os.getcwd()
     if not param:
         param = [apath] if apath else ["."]
-        if opts["verbose"]:
+        if opts["verbose"] >= 4:
             print("Using path:", param[0])
     if opts["cred"] is not None:
         hit = opts["cred"]
@@ -186,11 +189,11 @@ def do_replica(out, err, dest, param) -> int:
 
 def show_credentials(param, opts, out=True):
     verbose = opts["verbose"]
-    debug = int(verbose >= 3)
+    debug = int(verbose >= 4)
     mprint(debug, f"show_credentials(): opts={opts}, debug={debug}")
     a_filter, similar = opts["cred"], opts["similar"]
     mis = new_milot()
-    if verbose > 0:
+    if debug > 0:
         print("Show credentials, filter:", a_filter if a_filter else "ALL")
     for path in param:
         code = mis.process_path(path, debug=debug)
@@ -205,15 +208,26 @@ def show_credentials(param, opts, out=True):
         if verbose > 0:
             print(f"{title}: {cred[0]} {cred[1]}")
             lookup = info.keyval[0].get(title)
-            if verbose >= 2 and lookup:
-                print("INFO:", lookup)
-            print("--")
+            dump_look(title, lookup, verbose)
         else:
             print(f"{title:_<20.19} {cred[0]} {cred[1]}")
     if not creds:
         if verbose:
             print("Tried:", sorted(tries))
     return mis, creds
+
+def dump_look(title, lookup, verbose=1):
+    if verbose >= 2 and lookup:
+        if verbose >= 3:
+            print(
+                f"{title} (INFO): {lookup.split(',')}"
+                if verbose >= 4
+                else
+                f"{title} (INFO): {lookup}"
+            )
+        else:
+            print("INFO:", lookup)
+    print("--")
 
 
 def best_matches(mis, a_filter, similar, debug=0) -> tuple:

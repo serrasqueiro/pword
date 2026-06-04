@@ -1,7 +1,21 @@
 """ pword -- Passwords storing
+
+bpython debug:
+```python
+import importlib, pword; importlib.reload(pword)
+```
+
 """
 
-PWORD_VERSION = "1.21 14"
+PWORD_VERSION = "1.22 15"
 
 from .pcheckersconfig import PConfig
 from .milot import MiLot, mprint
+from .dictilar import DictShown
+
+__all__ = [
+    "PConfig",
+    "MiLot",
+    "mprint",
+    "DictShown",
+]

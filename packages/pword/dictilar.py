@@ -12,8 +12,9 @@ class Shown():
     _data = ""
     _name = ""
 
-    def __init__(self, name=""):
+    def __init__(self, name="", obj=None):
         self._name = name
+        self.obj = obj
         self._data = ""
 
     def named(self) -> str:
@@ -28,6 +29,7 @@ class Shown():
         """ Wrapper for string() """
         return self.string()
 
+
 class DictShown(Shown):
     """ DictShown - Show dictionaries in a comfortable way
     """
@@ -35,7 +37,7 @@ class DictShown(Shown):
         aname = name
         if name == "":
             aname = adict.__class__.__name__
-        super().__init__(aname)
+        super().__init__(aname, adict)
         self._data = self._build_text(adict, end=DEFAULT_END)
 
     def stringify(self, value) -> str:
@@ -61,6 +63,7 @@ class DictShown(Shown):
             astr += end
         return astr
 
+
 def safe_string(astr, quoted_empty="''") -> str:
     """ Returns a safe, readable-text string """
     if not astr:
@@ -78,6 +81,6 @@ def safe_string(astr, quoted_empty="''") -> str:
         result += tic
     return result
 
-# No main!
+
 if __name__ == "__main__":
     print("Import module!")

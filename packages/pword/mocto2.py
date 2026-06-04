@@ -93,6 +93,22 @@ class MatrixOcto8(TextMatrix):
             return [self.rows["by-letter"][alpha] for alpha in letter]
         return []
 
+    def get_cell(self, coord, triplet, a_max=3) -> str:
+        """ Returns A1.2, entered as coord="A1" and triplet="2"
+        """
+        assert isinstance(triplet, str), "Unexpected triplet: number string"
+        letter, s_col = coord[0], coord[1:]
+        assert 1 <= int(s_col) <= self._dim, f"Unexpected column: {[coord]}: {int(s_col)}"
+        n_which = int(triplet)
+        assert 1 <= n_which <= a_max, "Not within expected range: {n_which}"
+        arow = self.rows["by-letter"].get(letter, [])
+        if not arow:
+            return ""
+        n_col = int(s_col) - 1
+        three = arow[n_col]
+        res = three[n_which - 1]
+        return res
+
     def builder(self, debug=0) -> bool:
         """ Builds useful data-structure, and returns True if all is ok. """
         letters = _MATRIX_LINES

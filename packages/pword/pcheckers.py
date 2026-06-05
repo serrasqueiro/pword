@@ -223,7 +223,7 @@ def dump_look(title, lookup, verbose=1):
                 f"{title} (INFO): {lookup.split(',')}"
                 if verbose >= 4
                 else
-                f"{title} (INFO): {lookup}"
+                f"{title}: {lookup.split(";", 1)[1:][0].split(",")}"
             )
         else:
             print("INFO:", lookup)

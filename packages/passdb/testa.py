@@ -35,7 +35,12 @@ def dump_sev(adb, show_secret=False):
         s_hex = passdb.CRC32.compute_hex(key)
         a_pass = pwd_key[key]
         shown = [key, a_pass] if show_secret else [key]
-        print("Tree d:", s_hex, shown, item)
+        print(
+            "Tree d:",
+            s_hex,
+            shown,
+            f"Items: {len(item)}, {item}",
+        )
 
 
 if __name__ == "__main__":

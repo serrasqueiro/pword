@@ -6,6 +6,7 @@
 # pylint: disable=missing-function-docstring
 
 import os
+from .poly import CRC32
 
 
 def main_test():
@@ -153,10 +154,11 @@ class ADatabase:
         for key, item in accs["key"].items():
             user, p_ref = item.split(";", maxsplit=1)
             tree["a"][key] = (user, p_ref)
+            stg = (key, user, hex_crc(p_ref))
             if p_ref in pwds:
-                pwds[p_ref].append(user)
+                pwds[p_ref].append(stg)
             else:
-                pwds[p_ref] = [user]
+                pwds[p_ref] = [stg]
         for key, item in users["key"].items():
             assert item, f"Missing user referenced as: {[key]}"
             tree["b"][key] = item
@@ -164,6 +166,12 @@ class ADatabase:
             tree["c"][key] = item
         tree["d"] = pwds
         return tree
+
+
+def hex_crc(astr: str):
+    """ Returns CRC32 8-char (4 nibbles) string """
+    assert isinstance(astr, str), "hex()"
+    return CRC32.compute_hex(astr)
 
 
 def load_simple_config(path, enc_in="ascii"):

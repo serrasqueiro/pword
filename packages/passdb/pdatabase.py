@@ -24,7 +24,7 @@ class ADatabase:
     def __init__(self, basedir="", config="", check=True, name="ADB"):
         self.name = name
         self.msg = ""
-        self._basedir, self._okdir = "", False
+        self._basedir = ""
         self._cont, self._keybase = {}, {}
         self._tree = {}
         self._init_config(
@@ -115,7 +115,8 @@ class ADatabase:
             upkey = ''.join([achr.upper() for achr in key if achr > ' '])
             assert key not in self._keybase[mif]["key"], f"Already there ({mif}): {idx}: {key}"
             self._keybase[mif]["key"][key] = rvalue
-            assert upkey not in self._keybase[mif]["up-key"], f"Already there, up-key ({mif}): {idx}: {upkey}"
+            msg = f"Already there, up-key ({mif}): {idx}: {upkey}"
+            assert upkey not in self._keybase[mif]["up-key"], msg
             self._keybase[mif]["up-key"][upkey] = rvalue
             yield astr
 
@@ -159,7 +160,7 @@ class ADatabase:
             return "More than one orphan user: {} (...)".format(
                 ', '.join(res[:4]),
             )
-        elif res:
+        if res:
             return f"Several orphan users: {res}"
         return ""
 
@@ -167,11 +168,11 @@ class ADatabase:
         """ Check ranks match any of accounts.
         Also check users at info.mi exist!
         """
-        for key, item in self._tree["g"].items():
+        for key in self._tree["g"]:
             wot = self._tree["a"].get(key)
             if wot is None:
                 return f"Rank with invalid account id: {[key]}"
-        for key, item in self._tree["i"].items():
+        for key in self._tree["i"]:
             if key not in self._tree["a"]:
                 return f"Info with invalid account id: {[key]}"
         return ""

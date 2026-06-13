@@ -2,6 +2,8 @@
 
 #import zlib
 
+# pylint: disable=missing-function-docstring
+
 
 class CRC32:
     """ CRC-32 (IEEE 802.3) """
@@ -33,7 +35,7 @@ class CRC32:
         return f"{cls.compute(s):08X}"
 
 
-def crc32_hex(astr: str) -> str:
-    ivalue = zlib.crc32(astr.encode('ascii'))
-    res = f"{ivalue & 0xffffffff:08X}"
-    return res
+#def crc32_hex(astr: str) -> str:
+#    ivalue = zlib.crc32(astr.encode('ascii'))
+#    res = f"{ivalue & 0xffffffff:08X}"
+#    return res

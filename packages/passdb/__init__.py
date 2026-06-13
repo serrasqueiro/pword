@@ -7,6 +7,7 @@ import importlib, passdb; importlib.reload(passdb)
 """
 
 from .pdatabase import ADatabase
+from .phashing import PHasher
 from .poly import CRC32
 
 
@@ -17,5 +18,5 @@ VERSION = "1.30 21"
 __all__ = [
     "ADatabase",
     "CRC32",
-    # "crc32_hex"  <-- prefer CRC32
+    "PHasher",
 ]

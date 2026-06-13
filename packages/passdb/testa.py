@@ -81,29 +81,12 @@ def do_show_referenced():
     Only counts when stuff is of relevance.
     """
     adb = passdb.ADatabase(name="mydata")
-    dct = adb.get_tree()["d"]
-    imp = {}
-    for key, seq in dct.items():
-        lst = [
-            trip for trip in seq
-            if interesting(adb, trip[0])
-        ]
-        if not lst:
-            continue
-        imp[key] = lst
-    sorted_keys = sorted(
-        imp.keys(), key=lambda k: len(imp[k]),
-        reverse=True,
-    )
-    for idx, key in enumerate(sorted_keys, 1):
-        seq = imp[key]
-        print(
-            f"idx{idx}/{len(sorted_keys)}:",
-            len(seq),
-            key, seq,
-            end="\n\n",
-        )
-    #print(adb.get_tree()["g"])
+    pha = passdb.PHasher(adb)
+    pha.builder()
+    pha.dump_important()
+    is_ok = pha.brute_save()
+    if not is_ok:
+        return 1, adb
     return 0, adb
 
 def interesting(adb, key, min_val=4):

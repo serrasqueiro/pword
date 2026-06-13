@@ -40,6 +40,10 @@ class ADatabase:
         if check:
             self._do_all_checks()
 
+    def get_basedir(self):
+        """ Returns the base mi-files directory. """
+        return self._basedir
+
     def get_tree(self):
         """ Returns the tree dictionary. """
         return self._tree
@@ -187,8 +191,8 @@ class ADatabase:
         )
         key_abs_path = os.path.realpath(cfg["key_abs_path"])
         is_ok = os.path.isdir(key_abs_path)
-        self._basedir, self._base = key_abs_path, is_ok
-        return True
+        self._basedir = key_abs_path if is_ok else ""
+        return is_ok
 
     def _build_tree(self, dct):
         """ Get entire database tree.

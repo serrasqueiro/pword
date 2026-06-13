@@ -1,5 +1,8 @@
 """ Polynomial CRCs """
 
+#import zlib
+
+
 class CRC32:
     """ CRC-32 (IEEE 802.3) """
     POLY = 0xEDB88320
@@ -28,3 +31,9 @@ class CRC32:
     @classmethod
     def compute_hex(cls, s: str) -> str:
         return f"{cls.compute(s):08X}"
+
+
+def crc32_hex(astr: str) -> str:
+    ivalue = zlib.crc32(astr.encode('ascii'))
+    res = f"{ivalue & 0xffffffff:08X}"
+    return res

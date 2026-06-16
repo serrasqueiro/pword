@@ -17,9 +17,18 @@ def main_test():
     print("upkeys():", adb.upkeys("users"))
 
 
-class ADatabase:
+class Colored:
+    """ Card coloring extras. """
+    letter2color = {
+        "b": "brown",
+        "g": "green",
+    }
+
+
+class ADatabase(Colored):
     """ Any Database with potential 'key_abs_path' configuration file. """
     my_encoding = "ascii"
+    mi_files = "accs,users,info,pmap,rank,pcrc,pcolor"
 
     def __init__(self, basedir="", config="", check=True, name="ADB"):
         self.name = name
@@ -34,9 +43,7 @@ class ADatabase:
                 ".config", "pcheckers", "config",
             )
         )
-        self.load(
-            ["accs", "users", "info", "pmap", "rank"],
-        )
+        self.load(ADatabase.mi_files.split(","))
         if check:
             self._do_all_checks()
 
@@ -113,9 +120,14 @@ class ADatabase:
             assert line.endswith("\n"), f"Bad line ({mif}): {idx}"
             astr = line[:-1]
             # e.g. ACCOR;hclm;p
+            assert astr, f"Empty line not allowed ({mif}): {idx}"
+            assert len(astr) >= 3, f"Nearly empty line not allowed ({mif}): {idx}"
             keypair = astr.split(";", maxsplit=1)
-            key, rvalue = keypair
-            assert key, self.name
+            try:
+                key, rvalue = keypair
+            except ValueError:
+                key = None
+            assert key, f"{self.name}:{mif}.mi: line {idx}"
             upkey = ''.join([achr.upper() for achr in key if achr > ' '])
             assert key not in self._keybase[mif]["key"], f"Already there ({mif}): {idx}: {key}"
             self._keybase[mif]["key"][key] = rvalue
@@ -178,7 +190,7 @@ class ADatabase:
                 return f"Rank with invalid account id: {[key]}"
         for key in self._tree["i"]:
             if key not in self._tree["a"]:
-                return f"Info with invalid account id: {[key]}"
+                return f"info.mi with invalid account id: {[key]}"
         return ""
 
     def _init_config(self, basedir, config, def_config):
@@ -208,7 +220,9 @@ class ADatabase:
             "i": {},	# Info
             "j": {
                 1:0, 2:0, 3:0,	# Only up to 3 clashes in CRC32 allowed
-            }
+            },
+            "k": {},	# pcolor
+            "m": {},	# pcrc from file
         }
         pwds = {}
         accs, users = dct["accs"], dct["users"]
@@ -245,7 +259,27 @@ class ADatabase:
             tree["g"][key] = (int(aval), opt_extra)
         for key, item in dct["info"]["key"].items():
             tree["i"][key] = item
+        self._build_extras(dct, accs, tree)
         return tree
+
+    def _build_extras(self, dct, accs, tree):
+        """ Builds 'k' (pcolor) and 'm' (CRC32 from file) """
+        pcolor, crcs = dct["pcolor"]["key"], dct["pcrc"]["key"]
+        keys = {}
+        tree["m"] = {
+            "crc": {},
+            "hint": {},	# pass hint, e.g. 'sso' = Single Sign-On
+        }
+        for acc, color in pcolor.items():
+            upok = acc.upper() in accs["up-key"]
+            #print(":::", "brown" if color == "b" else "?", upok, acc)
+            msg = " Consider correct case." if upok else ""
+            assert acc in accs["key"], f"Not found {repr(acc)} at accounts!" + msg
+            tree["k"][acc] = Colored.letter2color[color]
+        for key, pass_hint in crcs.items():
+            tree["m"]["crc"][key] = pass_hint
+            tree["m"]["hint"][pass_hint] = key
+        return True
 
 
 def hex_crc(astr: str):

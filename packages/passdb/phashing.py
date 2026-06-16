@@ -79,5 +79,9 @@ class PHasher:
 
 def interesting(adb, key, min_val=4):
     ranks = adb.get_tree()["g"]
+    colors = adb.get_tree()["k"]
+    if colors.get(key, "y") == "brown":
+        # Brown color, uninteresting!
+        return False
     tup = ranks.get(key, (min_val, ''))
     return 0 < tup[0] <= min_val

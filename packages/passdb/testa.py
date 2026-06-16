@@ -87,6 +87,7 @@ def do_show_referenced():
     is_ok = pha.brute_save()
     if not is_ok:
         return 1, adb
+    print(f"Wrote: {adb.get_basedir()}/pcrc.mi")
     return 0, adb
 
 def interesting(adb, key, min_val=4):

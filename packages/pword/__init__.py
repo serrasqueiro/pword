@@ -7,7 +7,7 @@ import importlib, pword; importlib.reload(pword)
 
 """
 
-PWORD_VERSION = "1.22 16"
+PWORD_VERSION = "1.22 17"
 
 from .pcheckersconfig import PConfig
 from .milot import MiLot, mprint

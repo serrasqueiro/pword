@@ -286,6 +286,29 @@ class MiLot(MiAny):
         """ Returns the complete list of credentials (title, (username, password))
         It yields a single result if if_single=True and a_filter matches (exactly) a single title.
         """
+        res = self._get_cred_matches(a_filter, pass_text, if_single)
+        if if_single or res:
+            return res
+        # Try blanks instead ...
+        for convtry in (
+            (".", " "),
+            (".", "/"),
+            (".", ","),
+            (".", "_"),
+            (".", "-"),
+            ("-", "/"),
+        ):
+            this, bythat = convtry
+            new_filter = None
+            if this in a_filter:
+                new_filter = a_filter.replace(this, bythat).strip()
+                res = self._get_cred_matches(new_filter, pass_text, if_single)
+            if res:
+                return res
+        return res
+
+    def _get_cred_matches(self, a_filter=None, pass_text="plain", if_single=True) -> list:
+        """ Interim method (see credentials()). """
         assert isinstance(if_single, bool), self.name
         assert isinstance(pass_text, str), "Not pass_text=plain?"
         alist, refs = [], []
@@ -344,7 +367,7 @@ class MiLot(MiAny):
     def _show_title(self, title, a_filter) -> bool:
         if a_filter is None:
             return True
-        assert isinstance(a_filter, str)
+        assert isinstance(a_filter, str), "_show_title()"
         if self._ignore_case:
             title = title.upper()
             flt = a_filter.upper()

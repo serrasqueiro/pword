@@ -14,6 +14,7 @@ import pword
 from pword import PConfig, MiLot, mprint
 from pword import fileaccess
 
+DEBUG = 0
 DEF_RANK_WHEN_MISSING = 4
 
 
@@ -100,16 +101,20 @@ def process(out, err, args):
             print("Using path:", param[0])
     if opts["cred"] is not None:
         hit = opts["cred"]
-        msg = f"No 'cred' found, similar to: '{hit}'\nUse '-c ALL' to show all!\n"
-        mis, creds = show_credentials(param, opts)
+        msg = f"""No 'cred' found, similar to: '{hit}'
+Use '-c ALL' to show all!
+"""
+        mis, creds = show_credentials(param, opts, debug=DEBUG)
         code = 0 if mis else 4
         if code:
             assert creds, "Expected that no creds were found!"
             err.write(f"Bogus (error-code {code}), msg: {creds[0]}\n")
-        else:
+            return code
+        if not creds:
+            #mis, creds = show_credentials(param, opts, retry=True, debug=DEBUG)
             if not creds:
-                code = 2
                 err.write(msg)
+                return 2
     elif opts["replica"]:
         if len(param) > 1:
             return None
@@ -187,9 +192,8 @@ def do_replica(out, err, dest, param) -> int:
     return 0
 
 
-def show_credentials(param, opts, out=True):
+def show_credentials(param, opts, out=True, retry=False, debug=0):
     verbose = opts["verbose"]
-    debug = int(verbose >= 4)
     mprint(debug, f"show_credentials(): opts={opts}, debug={debug}")
     a_filter, similar = opts["cred"], opts["similar"]
     mis = new_milot()
@@ -200,8 +204,11 @@ def show_credentials(param, opts, out=True):
         if code:
             return None, [f"Bogus path: '{path}'"]
     info = mis.dbm["info"]
-    #creds, tries = best_matches(mis, a_filter, similar, debug)
-    creds, tries = best_rank_match(mis, a_filter, debug=debug)
+    creds, tries = best_rank_match(
+        mis, a_filter,
+        retry=retry,
+        debug=debug,
+    )
     if not out:
         return mis, creds
     for title, cred in creds:
@@ -211,8 +218,8 @@ def show_credentials(param, opts, out=True):
             dump_look(title, lookup, verbose)
         else:
             print(f"{title:_<20.19} {cred[0]} {cred[1]}")
-    if not creds:
-        if verbose:
+    if verbose > 0:
+        if tries:
             print("Tried:", sorted(tries))
     return mis, creds
 
@@ -264,7 +271,7 @@ def best_matches(mis, a_filter, similar, debug=0) -> tuple:
     return creds, tries
 
 
-def best_rank_match(mis, a_filter=None, show_pass="plain", debug=0):
+def best_rank_match(mis, a_filter=None, show_pass="plain", retry=False, debug=0):
     """ Returns credentials sorted by rank (1..9). 0 means ignored.
     Lower rank number = higher priority.
     When rank.mi has no score for an account, consider 4 (DEF_RANK_WHEN_MISSING)
@@ -286,7 +293,11 @@ def best_rank_match(mis, a_filter=None, show_pass="plain", debug=0):
         if rnum <= 0:
             continue
         ranked.append((rnum, title, pair))
-        mprint(debug, "best_rank_match(), added:", ranked[-1])
+        mprint(
+            debug,
+            f"Debug(level={debug}): best_rank_match(), added:",
+            ranked[-1],
+        )
     # Sort by rank number, then title
     ranked.sort(key=lambda x: (x[0], x[1]))
     # Strip rank from output

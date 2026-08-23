@@ -218,7 +218,7 @@ def show_credentials(param, opts, out=True, retry=False, debug=0):
             dump_look(title, lookup, verbose)
         else:
             print(f"{title:_<20.19} {cred[0]} {cred[1]}")
-    if verbose > 0:
+    if verbose >= 4:
         if tries:
             print("Tried:", sorted(tries))
     return mis, creds
